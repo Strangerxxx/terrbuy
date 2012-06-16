@@ -26,6 +26,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -35,6 +36,7 @@ import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
 public class terrbuy extends JavaPlugin {
+        protected FileConfiguration config;
     @SuppressWarnings("NonConstantLogger")
 	Logger log;
 	WorldGuardPlugin worldGuard;
@@ -45,6 +47,9 @@ public class terrbuy extends JavaPlugin {
     @SuppressWarnings("CallToThreadDumpStack")
 	public void onEnable(){
 		log = this.getLogger();
+                config = getConfig();
+                config.options().copyDefaults(true);
+                saveConfig();
 		worldGuard = getWorldGuard();
 		try {
 			worldEdit = worldGuard.getWorldEdit();
@@ -84,7 +89,7 @@ public class terrbuy extends JavaPlugin {
                 PermissionManager permissionManager = PermissionsEx.getPermissionManager();
 		if(cmd.getName().equalsIgnoreCase("terrbuy")){
 			if(permissionManager.has(player, "terrbuy.buy")){
-				Material material = Material.IRON_INGOT;
+				Material material = Material.getMaterial(config.getInt("id"));
 				Block block = player.getLocation().getBlock().getRelative(0, -1, 0);
 				Vector pt = toVector(block);
 				ApplicableRegionSet set = regionManager.getApplicableRegions(pt);
@@ -99,8 +104,10 @@ public class terrbuy extends JavaPlugin {
 									each.setOwners(owners);
 									if(each.isOwner(localPlayer)){
 										each.setFlag(DefaultFlag.BUYABLE, false);
-										log.log(Level.INFO, "{0} is now owner of {1} region!", new Object[]{player.getDisplayName(), each.getId()});
-										player.sendMessage("You are now owner of "+each.getId()+" region!");
+                                                                                log.info(player.getDisplayName()+" is now owner of "+each.getId()+" region!");
+										//log.log(Level.INFO, "{0} is now owner of {1} region!", new Object[]{player.getDisplayName(), each.getId()});
+										//not working, i'm going sleep
+                                                                                player.sendMessage("You are now owner of "+each.getId()+" region!");
 									} else player.sendMessage("An error has occurred!");
 								} else player.sendMessage("Can't get "+cost+" money from your inventory!");
 							} else player.sendMessage("You have not "+cost+" money!");
