@@ -1,9 +1,25 @@
 package org.gamegen;
 
+import com.sk89q.minecraft.util.commands.CommandException;
+import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
+import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
+import com.sk89q.worldedit.bukkit.selections.Polygonal2DSelection;
+import com.sk89q.worldedit.bukkit.selections.Selection;
+import com.sk89q.worldguard.LocalPlayer;
 import static com.sk89q.worldguard.bukkit.BukkitUtil.toVector;
-
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.domains.DefaultDomain;
+import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
+import com.sk89q.worldguard.protection.flags.DefaultFlag;
+import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
+import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -15,30 +31,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import ru.tehkode.permissions.PermissionUser;
+import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
-import com.sk89q.minecraft.util.commands.CommandException;
-import com.sk89q.worldedit.BlockVector;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
-import com.sk89q.worldedit.bukkit.selections.Polygonal2DSelection;
-import com.sk89q.worldedit.bukkit.selections.Selection;
-import com.sk89q.worldguard.LocalPlayer;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import com.sk89q.worldguard.domains.DefaultDomain;
-import com.sk89q.worldguard.protection.ApplicableRegionSet;
-import com.sk89q.worldguard.protection.databases.ProtectionDatabaseException;
-import com.sk89q.worldguard.protection.flags.DefaultFlag;
-import com.sk89q.worldguard.protection.managers.RegionManager;
-import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
-import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import ru.tehkode.permissions.PermissionManager;
-
 public class terrbuy extends JavaPlugin {
+    @SuppressWarnings("NonConstantLogger")
 	Logger log;
 	WorldGuardPlugin worldGuard;
 	WorldEditPlugin worldEdit;
@@ -54,6 +51,7 @@ public class terrbuy extends JavaPlugin {
 		}
 	}
 	
+    @Override
 	public void onDisable() {
 	}
 	
@@ -68,6 +66,8 @@ public class terrbuy extends JavaPlugin {
 	    return (WorldGuardPlugin) plugin;
 	}
 	
+    @Override
+    @SuppressWarnings("CallToThreadDumpStack")
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args){
 		Player player = null;
 		if (sender instanceof Player) {
@@ -84,9 +84,8 @@ public class terrbuy extends JavaPlugin {
 			if(permissionManager.has(player, "terrbuy.buy")){
 				Material material = Material.IRON_INGOT;
 				Block block = player.getLocation().getBlock().getRelative(0, -1, 0);
-				Vector pt = toVector(block); // This also takes a location
+				Vector pt = toVector(block);
 				ApplicableRegionSet set = regionManager.getApplicableRegions(pt);
-				// doSomething
 				for (ProtectedRegion each : set) {
 					if(!each.isOwner(localPlayer)){
 						if((set.getFlag(DefaultFlag.BUYABLE) == true) && (set.getFlag(DefaultFlag.PRICE) != null)){
@@ -98,7 +97,7 @@ public class terrbuy extends JavaPlugin {
 									each.setOwners(owners);
 									if(each.isOwner(localPlayer)){
 										each.setFlag(DefaultFlag.BUYABLE, false);
-										log.info(player.getDisplayName()+" is now owner of "+each.getId()+" region!");
+										log.log(Level.INFO, "{0} is now owner of {1} region!", new Object[]{player.getDisplayName(), each.getId()});
 										player.sendMessage("You are now owner of "+each.getId()+" region!");
 									} else player.sendMessage("An error has occurred!");
 								} else player.sendMessage("Can't get "+cost+" money from your inventory!");
