@@ -41,6 +41,8 @@ public class terrbuy extends JavaPlugin {
 	WorldEditPlugin worldEdit;
 	ProtectedRegion region;
 	
+    @Override
+    @SuppressWarnings("CallToThreadDumpStack")
 	public void onEnable(){
 		log = this.getLogger();
 		worldGuard = getWorldGuard();
