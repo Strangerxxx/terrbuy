@@ -1,5 +1,5 @@
 name: terrbuy
-main: org.gamegen.terrbuy
+main: org.gamegen.terrbuy.terrbuy
 version: 0.0.0001
 website: http://gamegen.org
 author: stranger & Jegor
